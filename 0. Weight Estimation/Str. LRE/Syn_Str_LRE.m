@@ -5,7 +5,8 @@
 %%% Affilliations: Konkuk University, South Korea; University of South Carolina, USA
 %%% Authors: Jung I. Shu, Jae-Woo Lee, Sangho Kim, Jaelyun Lee, and Yi Wang
 %%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%function StateVars = Syn_Str_LRE(StateVars, n)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+function StateVars = Syn_Str_LRE(StateVars, n)
 format long
 %% User Inputs
 K_Eng   = StateVars.Engine_Budget(n);
