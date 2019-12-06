@@ -1,0 +1,89 @@
+% Weight Estimation Module(Objective Function)
+% Programmed by JUNG-IL, SHU.
+% 2013 Copyright (c) AERODANMIC ANALYSIS & DESIGN LAB, KONKUK Univ.
+% All Rights Reserved.
+function StateVars = Str_SRM(StateVars, n)
+%% User Inputs
+Corr_F  = StateVars.Motor_CorrFactors(n);
+M0      = StateVars.Total_Mass(n);
+Mpl     = StateVars.Payload(n);
+ISP     = StateVars.Isp_vc(n);
+T_W     = StateVars.T_W(n);
+t_bo    = StateVars.Burning_Time(n);
+
+%% Parameters
+g0      = 9.81;
+
+%% Main Formula
+Err = inf;
+Tol = 1E-10;
+while Err > Tol
+    
+    Mp          = T_W * M0.* t_bo ./ ISP;
+    Ms          = M0 - (Mp + Mpl);
+    Thrust      = T_W * M0 * g0;
+  
+    
+    if Mp <= 10000
+        Ms_new       = Corr_F *( 0.0706*Mp+18.974 );
+    else
+        Ms_new       = Corr_F *( 0.1554*Mp );
+    end
+    
+    
+    M_tot = Ms_new + Mp + Mpl;
+    
+    Y1 = T_W;
+    Y2 = t_bo;
+    
+    F1 = M0 - M_tot;
+    F2 = Ms_new - Ms;
+    
+    dF11 = -M0.*t_bo./ISP;
+    dF12 = T_W.*M0./ISP;
+    dF21 = -M0.*t_bo./ISP;
+    dF22 = -T_W.*M0./ISP;
+    
+    
+    Y   = [Y1;Y2];
+    F   = [F1;F2];
+    dF  = [dF11 dF12; dF21 dF22];
+    
+    Y_new = Y + dF\F;
+    
+    Err = norm(Y_new - Y);
+    
+    Y = Y_new;
+    
+    
+    T_W     = Y(1,1);
+    t_bo    = Y(2,1);
+    
+end
+
+
+%% Structural Ratio
+Eps     = Ms ./ (Ms + Mp);
+MR      = M_tot./(M_tot-Mp);
+
+%% Write Output Data
+StateVars.Total_Mass_Input(n)       = M0;
+StateVars.Total_Mass_Output(n)      = M_tot;
+if n > 1
+    StateVars.Payload(n-1)    = M_tot;
+end
+StateVars.Propellant(n)       = Mp;
+StateVars.Structure(n)        = Ms;
+StateVars.Structure_N(n)      = Ms_new;
+StateVars.Engine(n)           = Meng;
+StateVars.Eps(n)              = Eps;
+StateVars.Ratio(n)            = MR;
+StateVars.Thrust(n)           = Thrust;
+StateVars.T_W(n)              = T_W;
+StateVars.T_W_Engine(n)       = Thrust./(Meng*9.81);
+StateVars.Burning_Time(n)     = t_bo;
+% Dummy
+StateVars.Eng_Mass_Ratio(n)   = K_Eng;
+StateVars.Isp_vc(n)           = ISP;
+
+end
